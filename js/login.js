@@ -1,3 +1,4 @@
+if(window.top!==window)window.top.location.replace('/login.html'+window.location.search);
 
     /* ══════════════════════════════════
        AUTH CHECK — redirige si déjà connecté
@@ -12,7 +13,7 @@
         })
         .then(function(r) { return r.json() })
         .then(function(data) {
-          if (data.valid) window.location.href = '/dashbord'
+          if (data.valid) window.top.location.replace('/dashbord')
         })
         .catch(function(){})
       }
@@ -71,7 +72,7 @@
           localStorage.removeItem('nyxia_username')
           showMsg('✓ Connexion réussie ! Redirection...', 'success')
           setTimeout(function() {
-            window.location.href = '/dashbord'
+            window.top.location.replace('/dashbord')
           }, 1000)
         } else {
           showMsg(data.error || ('Identifiants incorrects. Code : ' + (data.__status || 'inconnu')), 'error')
