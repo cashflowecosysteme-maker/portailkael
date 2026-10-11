@@ -34,8 +34,3 @@ binding = "AI"
 [vars]
 SITE_URL = "https://portailkael.nyxia.top/"
 PORTAIL = "kael"
-SYSTEME_ACTIVATION_FIELD = "lien_activation_nyxia"
-SYSTEME_ACTIVATION_TAG_ID = "2221814"
-SYSTEME_RESET_FIELD = "nyxia_reset_url"
-SYSTEME_RESET_TAG_ID = "2223012"
-UNSPLASH_ID = "995072"

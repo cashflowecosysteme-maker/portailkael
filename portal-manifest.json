@@ -2,7 +2,7 @@
   "id": "kael",
   "accessVersion": 1,
   "title": "Portail Kael - Relation & Couple",
-  "shortTitle": "Portail Kael",
+  "shortTitle": "Portail Kael - Relation & Couple",
   "mission": "Relation & Famille",
   "loginImage": "https://d1yei2z3i6k35z.cloudfront.net/1872133/6ab6894dca72f0.36294748_Kael.png",
   "activeAgents": [
@@ -136,7 +136,8 @@
       "createdAt": "2026-09-29T15:47:09.864Z",
       "updatedAt": "2026-10-01T21:31:09.726Z",
       "version": 5,
-      "placement": "principal"
+      "placement": "principal",
+      "voiceEnv": "ELEVENLABS_NYXIA_VOICE_ID"
     },
     {
       "key": "diane",
@@ -296,7 +297,8 @@
       "createdAt": "2026-09-29T15:49:39.141Z",
       "updatedAt": "2026-10-02T00:48:52.897Z",
       "version": 8,
-      "placement": "principal"
+      "placement": "principal",
+      "voiceEnv": "ELEVENLABS_DIANE_VOICE_ID"
     },
     {
       "key": "eric",
@@ -405,7 +407,8 @@
       "createdAt": "2026-09-29T15:50:48.702Z",
       "updatedAt": "2026-10-02T20:32:35.803Z",
       "version": 8,
-      "placement": "atelier"
+      "placement": "atelier",
+      "voiceEnv": "ELEVENLABS_ERIC_VOICE_ID"
     },
     {
       "key": "kael",
@@ -499,7 +502,8 @@
       "createdAt": "2026-09-29T16:42:47.618Z",
       "updatedAt": "2026-10-10T22:54:02.312Z",
       "version": 9,
-      "placement": "principal"
+      "placement": "principal",
+      "voiceEnv": "ELEVENLABS_KAEL_VOICE_ID"
     },
     {
       "key": "vanessa",
@@ -586,7 +590,9 @@
       "createdAt": "2026-10-01T20:07:35.861Z",
       "updatedAt": "2026-10-11T12:03:34.473Z",
       "version": 7,
-      "placement": "atelier"
+      "placement": "atelier",
+      "icon": "✦",
+      "voiceEnv": "ELEVENLABS_VANESSA_VOICE_ID"
     },
     {
       "key": "sebastien",
@@ -626,7 +632,7 @@
         "@NYXIA_TRIGGER:{\"l\":\"🎓 Pratiquer comme étudiant\",\"a\":\"chat\",\"m\":\"Propose-moi une mise en situation de coaching relationnel avec une rétroaction sur ma posture.\"}"
       ],
       "image": "https://d1yei2z3i6k35z.cloudfront.net/1872133/6abebcc203f5b2.49746038_S%C3%A9bastien.png",
-      "welcomeVideo": "",
+      "welcomeVideo": "https://d1yei2z3i6k35z.cloudfront.net/1872133/6acbc09f1bde99.77240614_Sebastien_Bievenue.mp4",
       "voiceName": "",
       "voiceId": "mVjOqyqTPfwlXPjV5sjX",
       "voiceNotes": "",
@@ -672,10 +678,11 @@
       "updatedAt": "2026-10-11T12:57:54.723Z",
       "version": 3,
       "placement": "atelier",
-      "icon": "✦"
+      "icon": "✦",
+      "voiceEnv": "ELEVENLABS_SEBASTIEN_VOICE_ID"
     }
   ],
   "host": "portailkael.nyxia.top",
   "workerName": "kael",
-  "compiledAt": "2026-10-11T15:05:51.717Z"
+  "compiledAt": "2026-10-11T19:19:30.532Z"
 }
