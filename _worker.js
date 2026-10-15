@@ -181,7 +181,7 @@ async function formations(env,agent){
 function renderBlock(b,first){const t=String(b?.type||'texte').toLowerCase();if(t==='texte'||t==='intervention')return String(b.contenu||'').replace(/\{prenom\}/gi,first||'toi');if(t==='exercice')return['🎯 '+(b.objectif||''),b.consigne||''].filter(Boolean).join('\n\n');if(t==='image')return (b.legende?b.legende+'\n':'')+'[IMAGE: '+b.url+']';if(t==='audio')return (b.intro?b.intro+'\n':'')+'[AUDIO: '+b.url+'|'+(b.titre||'Audio')+']';if(t==='video'||t==='vidéo')return (b.intro?b.intro+'\n':'')+'[VIDEO: '+b.url+'|'+(b.titre||'Vidéo')+']';if(t==='lien')return (b.intro?b.intro+'\n':'')+'[LINK: '+b.url+'|'+(b.titre||'Ouvrir')+']';return''}
 async function formationTurn(env,s,agent,msg,requestedId=''){const n=norm(msg).normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(!/(formation|cours|suite|continue|reprend)/.test(n))return null;const fs=await formations(env,agent);if(!fs.length)return null;let requested=requestedId;const progressKey='formation-progress:'+PORTAL.id+':'+s.email+':'+agent;let prior={};try{prior=JSON.parse(await env.CASHFLOW_KV.get(progressKey)||'{}')}catch(_){};const f=fs.find(f=>f.id===(requested||prior.formationId))||fs[0],mods=f.modules||[];if(!mods.length)return{content:'Cette formation n’a pas encore de module.'};const key='formation-progress:'+PORTAL.id+':'+s.email+':'+agent;let st={mi:0,bi:0};try{st={...st,...JSON.parse(await env.CASHFLOW_KV.get(key)||'{}')}}catch(_){}
  const previousId=st.formationId||fs[0].id;if(previousId!==f.id){st.byFormation=st.byFormation&&typeof st.byFormation==='object'?st.byFormation:{};st.byFormation[previousId]={mi:st.mi,bi:st.bi,started:st.started};const saved=st.byFormation[f.id]||{mi:0,bi:0,started:false};st={...st,...saved}}st.formationId=f.id;
- if(/suite|continue|reprend/.test(n)&&st.started)st.bi++;else st.started=true;while(st.mi<mods.length&&st.bi>=(mods[st.mi].blocs||[]).length){st.mi++;st.bi=0}if(st.mi>=mods.length)return{content:'✨ Tu as terminé « '+(f.titre||'la formation')+' ».'};const m=mods[st.mi],b=(m.blocs||[])[st.bi];await env.CASHFLOW_KV.put(key,JSON.stringify(st));return{content:'🎓 **'+(f.titre||'Formation')+' — Module '+(m.numero||st.mi+1)+' · '+(m.titre||'')+'**\n\n'+renderBlock(b,s.firstname)+'\n\n— Quand tu es prête, dis-moi « suite ».'}}
+ if(/suite|continue|reprend/.test(n)&&st.started)st.bi++;else st.started=true;while(st.mi<mods.length&&st.bi>=(mods[st.mi].blocs||[]).length){st.mi++;st.bi=0}if(st.mi>=mods.length){st.completed=st.completed||{};st.completed[f.id]=true;await env.CASHFLOW_KV.put(key,JSON.stringify(st));return{formationDone:true,formationId:f.id,content:'✨ Tu as terminé « '+(f.titre||'la formation')+' ».'}};const m=mods[st.mi],b=(m.blocs||[])[st.bi];await env.CASHFLOW_KV.put(key,JSON.stringify(st));return{content:'🎓 **'+(f.titre||'Formation')+' — Module '+(m.numero||st.mi+1)+' · '+(m.titre||'')+'**\n\n'+renderBlock(b,s.firstname)+'\n\n— Quand tu es prête, dis-moi « suite ».'}}
 
 function sanitizeAssistantContent(content){
  const fallback='Je suis là avec toi. Dis-moi ce que tu veux faire avancer.';
@@ -495,7 +495,7 @@ function nxPremiumHydrateSource(text){
 }
 export default {
   async fetch(request,env,ctx){
-    const live=await nxLiveApi(request,env,ctx);if(live)return live;
+    const flow=await nxFormationFlowApi(request,env,ctx);if(flow)return flow;const live=await nxLiveApi(request,env,ctx);if(live)return live;
     const response=await nxOriginalWorker.fetch(request,env,ctx);
     const path=new URL(request.url).pathname;
     if(path==='/api/check-auth'&&response.ok){
@@ -545,4 +545,25 @@ async function nxLiveApi(request,env,ctx){
  const id=t.key.split(':').slice(3).join(':'),s={email:auth.email,firstname:auth.firstname||auth.first_name||auth.userName||''};
  const result=await NX_LIVE_OPEN(env,s,agent,id);
  return result?json(result):json({error:'Formation introuvable.'},404);
+}
+
+async function NX_FLOW_LIST(env,s,agent){const fs=await formations(env,agent);let st={};try{st=JSON.parse(await env.CASHFLOW_KV.get('formation-progress:'+PORTAL.id+':'+s.email+':'+agent)||'{}')}catch(_){}return fs.map((f,i)=>({id:f.id,titre:f.titre,hasProgress:!!(st.formationId===f.id?st.started:st.byFormation?.[f.id]?.started||(!st.formationId&&i===0&&st.started)),status:st.completed?.[f.id]?'completed':'active'}))}
+async function NX_FLOW_TURN(env,s,agent,id,advance,mode){if(mode==='review'){const kv=env.CASHFLOW_KV,key='formation-progress:'+PORTAL.id+':'+s.email+':'+agent,review=key+':review:'+id;const target={...env,CASHFLOW_KV:{get:(k,...args)=>kv.get(k===key?review:k,...args),put:(k,...args)=>kv.put(k===key?review:k,...args),list:(...args)=>kv.list(...args)}};const r=await formationTurn(target,s,agent,advance?'suite':'reprendre ma formation',id);if(r){r.review=true;if(r.formationDone){delete r.formationDone;r.reviewDone=true}}return r}return formationTurn(env,s,agent,advance?'suite':'commencer ma formation',id)}
+async function nxFormationFlowApi(request,env,ctx){
+ const u=new URL(request.url);if(u.pathname!=='/api/personnage/formation')return null;
+ const b=await request.clone().json().catch(()=>({})),agent=String(b.agent||'').toLowerCase();
+ if(!NX_PREMIUM_KEYS().includes(agent))return json({error:'Personnage non disponible.'},403);
+ const check=await nxOriginalWorker.fetch(new Request(new URL('/api/check-auth',request.url),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:b.token||''})}),env,ctx);
+ const auth=await check.json().catch(()=>({}));if(!auth.valid)return json({error:'Session expirée.'},401);
+ if(typeof requireEricAccess==='function'&&agent==='eric'){const blocked=await requireEricAccess(env,auth);if(blocked)return blocked}
+ const s={...auth,firstname:auth.firstname||auth.first_name||''};
+ const list=await NX_FLOW_LIST(env,s,agent);
+ if(b.action==='list')return json({formations:list});
+ const selected=list.find(f=>f.id===b.formationId)||(!b.formationId?list.find(f=>f.status!=='locked'&&f.status!=='completed'):null);
+ if(!selected)return json({error:'Formation introuvable.'},404);
+ if(selected.status==='locked')return json({error:'Cette formation n’est pas encore débloquée.'},403);
+ const result=await NX_FLOW_TURN(env,s,agent,selected.id,b.action==='advance',selected.status==='completed'?'review':b.mode||'');
+ if(!result)return json({error:'Formation introuvable.'},404);
+ result.content=String(result.content||'').replace(/\n\n— [^\n]*(?:[«“]suite[»”]|dis [«“]suite[»”])[^\n]*\s*$/i,'');
+ return json({...result,formationId:result.formationId||selected.id});
 }
