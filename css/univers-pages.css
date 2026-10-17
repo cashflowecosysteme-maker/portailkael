@@ -48,3 +48,12 @@ h1{margin:0 0 10px;font-family:'Cormorant Garamond',serif;font-size:clamp(34px,5
 @media(max-width:680px){.page{width:min(100% - 20px,1180px);padding-top:16px}.hero{grid-template-columns:1fr;padding:20px}.hero-orb{display:none}.grid{grid-template-columns:1fr}.detail-card{padding:18px}}
 
 .formation-zone{margin:24px 0}.section-heading{margin-bottom:16px}.section-heading h2{margin:0;font-size:22px}.formation-trainers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.formation-trainers .body{padding:22px}.formation-trainers h3{color:var(--p3)}
+
+
+/* Cercle d’entraide — barre de défilement conforme au menu. */
+html:has(.cercle-callout),body:has(.cercle-callout),body:has(.cercle-callout) .detail-card{scrollbar-width:thin;scrollbar-color:rgba(123,92,255,.25) transparent}
+html:has(.cercle-callout)::-webkit-scrollbar,body:has(.cercle-callout)::-webkit-scrollbar,body:has(.cercle-callout) .detail-card::-webkit-scrollbar{width:6px;height:6px}
+html:has(.cercle-callout)::-webkit-scrollbar-track,body:has(.cercle-callout)::-webkit-scrollbar-track,body:has(.cercle-callout) .detail-card::-webkit-scrollbar-track{background:transparent}
+html:has(.cercle-callout)::-webkit-scrollbar-thumb,body:has(.cercle-callout)::-webkit-scrollbar-thumb,body:has(.cercle-callout) .detail-card::-webkit-scrollbar-thumb{background:rgba(123,92,255,.25);border-radius:10px}
+html:has(.cercle-callout)::-webkit-scrollbar-thumb:hover,body:has(.cercle-callout)::-webkit-scrollbar-thumb:hover,body:has(.cercle-callout) .detail-card::-webkit-scrollbar-thumb:hover{background:rgba(123,92,255,.45)}
+html:has(.cercle-callout)::-webkit-scrollbar-corner,body:has(.cercle-callout)::-webkit-scrollbar-corner,body:has(.cercle-callout) .detail-card::-webkit-scrollbar-corner{background:transparent}
